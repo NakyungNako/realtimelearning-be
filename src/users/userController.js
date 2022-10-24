@@ -4,6 +4,7 @@ const {
   registerUser,
   findOneByUsername,
 } = require("./userService");
+const bcrypt = require("bcrypt");
 
 module.exports.register = async (req, res, next) => {
   try {
@@ -44,7 +45,8 @@ module.exports.register = async (req, res, next) => {
 
     //HashPassword
     const password = data.password;
-    // data.password = await hashPassword(password);
+    const salt = await bcrypt.genSalt(Number(process.env.SALT));
+    data.password = await bcrypt.hash(password, salt);
 
     //Register new User
     const result = await registerUser(data);
