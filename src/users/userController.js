@@ -12,14 +12,14 @@ module.exports.register = async (req, res, next) => {
     let data = req.body;
     const validated = registerValidate(data);
     if (validated.error != null)
-      return res.status(400).json({
+      return res.status(200).json({
         error: true,
         message: validated.error.details[0].message,
       });
 
     //Check Confirm Password
     if (data.password != data.confirmPassword) {
-      return res.status(400).json({
+      return res.status(200).json({
         error: true,
         message: "Confirm password is incorrect",
       });
@@ -28,7 +28,7 @@ module.exports.register = async (req, res, next) => {
     //Check Email Exist
     const checkEmailResult = await findOneByEmail(data.email);
     if (checkEmailResult != null) {
-      return res.status(400).json({
+      return res.status(200).json({
         error: true,
         message: "Email has already registered",
       });
@@ -37,7 +37,7 @@ module.exports.register = async (req, res, next) => {
     //Check Username Exist
     const checkUsernameResult = await findOneByUsername(data.username);
     if (checkUsernameResult != null) {
-      return res.status(400).json({
+      return res.status(200).json({
         error: true,
         message: "Username has been taken",
       });
@@ -57,9 +57,9 @@ module.exports.register = async (req, res, next) => {
       return;
     }
 
-    return res.status(200).json({
+    return res.status(201).json({
       error: false,
-      message: result,
+      message: result.message,
     });
   } catch (e) {
     next(e);
