@@ -11,7 +11,7 @@ connection();
 app.use(express.json());
 app.use(
   cors({
-    origin: "https://client-registration.vercel.app",
+    origin: process.env.CLIENT_URL,
   })
 );
 
