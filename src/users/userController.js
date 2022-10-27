@@ -74,7 +74,7 @@ module.exports.login = async (req, res, next) => {
     const user = await findOneByUsername(data.username);
     // console.log(user);
     if (!user) {
-      return res.status(400).json({
+      return res.status(200).json({
         error: true,
         message: "The username you entered is not registered.",
       });
@@ -90,7 +90,7 @@ module.exports.login = async (req, res, next) => {
     console.log("Password " + user.password);
     const isValid = await bcrypt.compare(data.password, user.password);
     if (!isValid) {
-      return res.status(400).json({
+      return res.status(200).json({
         error: true,
         message: "The password you entered is not correct",
       });
