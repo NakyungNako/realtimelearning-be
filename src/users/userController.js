@@ -3,9 +3,12 @@ const {
   findOneByEmail,
   registerUser,
   findOneByUsername,
+  findOneByToken,
+  getAllUsernames,
 } = require("./userService");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../../config/env");
 
 module.exports.register = async (req, res, next) => {
   try {
@@ -67,7 +70,7 @@ module.exports.register = async (req, res, next) => {
   }
 };
 
-module.exports.login = async (req, res, next) => {
+module.exports.login = async (req, res) => {
   try {
     const data = req.body;
     //Find User In DB
@@ -111,17 +114,69 @@ module.exports.login = async (req, res, next) => {
     //   });
     // }
     //JWT
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-      expiresIn: 10000000,
-    });
-    //res.header("auth-token", token).send(token);
+    const token = jwt.sign(
+      { id: user.id, username: user.username },
+      JWT_SECRET,
+      { expiresIn: 10 }
+    );
 
+    const refreshToken = jwt.sign(
+      { username: user.username },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: "15s" }
+    );
+    user.refreshToken = refreshToken;
+    await user.save();
+    //res.header("auth-token", token).send(token);
+    res.cookie("jwt", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    });
     // const tokenObject = Util.issueJWT(user);
     return res.status(200).send({
-      data: token,
+      token: token,
+      username: user.username,
+      id: user.id,
       message: "logged in successfully!!!",
     });
   } catch (error) {
     console.log(error);
+  }
+};
+
+module.exports.usernames = async (req, res) => {
+  try {
+    const users = await getAllUsernames();
+    return res.status(200).json(users);
+    console.log("ahihi");
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+module.exports.refresh = async (req, res) => {
+  const cookies = req.cookies;
+  console.log(cookies);
+  if (!cookies?.jwt) return res.status(401).json({ message: "Unauthorized" });
+  const user = await findOneByToken(cookies.jwt);
+  if (user) {
+    const refreshToken = req.cookies.jwt;
+    jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, (err, decoded) => {
+      if (err) {
+        // Wrong Refesh Token
+        return res.status(406).json({ message: "Unauthorized" });
+      } else {
+        // Correct token we send a new access token
+        const token = jwt.sign(
+          { id: user.id, username: user.username },
+          JWT_SECRET,
+          { expiresIn: 10 }
+        );
+        return res.json({ token });
+      }
+    });
+  } else {
+    return res.status(406).json({ message: "Unauthorized" });
   }
 };

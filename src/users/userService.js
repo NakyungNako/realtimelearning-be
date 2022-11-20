@@ -36,3 +36,27 @@ module.exports.registerUser = async (data) => {
     };
   }
 };
+
+module.exports.findOneByToken = async (token) => {
+  try {
+    const foundUser = await User.findOne({ refreshToken: token });
+    return foundUser;
+  } catch (error) {
+    console.error(error);
+    return {
+      error: error.message || "Some error occurred while update User!",
+    };
+  }
+};
+
+module.exports.getAllUsernames = async () => {
+  try {
+    const users = await User.find({}, { username: 1 });
+    return users;
+  } catch (error) {
+    console.error(error);
+    return {
+      error: error.message || "Some error occurred while get Users!",
+    };
+  }
+};
