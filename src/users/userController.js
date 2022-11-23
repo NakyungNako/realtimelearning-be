@@ -123,7 +123,7 @@ module.exports.login = async (req, res) => {
     const refreshToken = jwt.sign(
       { username: user.username },
       process.env.JWT_REFRESH_SECRET,
-      { expiresIn: "15s" }
+      { expiresIn: "1d" }
     );
     user.refreshToken = refreshToken;
     await user.save();
@@ -143,6 +143,27 @@ module.exports.login = async (req, res) => {
   } catch (error) {
     console.log(error);
   }
+};
+
+module.exports.logout = async (req, res) => {
+  const cookies = req.cookies;
+  if (!cookies?.jwt) return res.status(204); //No content
+  const refreshToken = cookies.jwt;
+
+  // Is refreshToken in db?
+  const foundUser = await findOneByToken(refreshToken);
+  if (!foundUser) {
+    res.clearCookie("jwt", { httpOnly: true, secure: true });
+    return res.status(204);
+  }
+
+  // Delete refreshToken in db
+  foundUser.refreshToken = "";
+  const result = await foundUser.save();
+  console.log(result);
+
+  res.clearCookie("jwt", { httpOnly: true, secure: true });
+  res.status(204);
 };
 
 module.exports.usernames = async (req, res) => {
@@ -167,13 +188,14 @@ module.exports.refresh = async (req, res) => {
         // Wrong Refesh Token
         return res.status(406).json({ message: "Unauthorized" });
       } else {
+        const username = user.username;
         // Correct token we send a new access token
         const token = jwt.sign(
           { id: user.id, username: user.username },
           JWT_SECRET,
           { expiresIn: 10 }
         );
-        return res.json({ token });
+        return res.json({ username, token });
       }
     });
   } else {
