@@ -129,7 +129,6 @@ module.exports.login = async (req, res) => {
     await user.save();
     //res.header("auth-token", token).send(token);
     res.cookie("jwt", refreshToken, {
-      secure: true,
       maxAge: 24 * 60 * 60 * 1000,
     });
     // const tokenObject = Util.issueJWT(user);
@@ -152,7 +151,7 @@ module.exports.logout = async (req, res) => {
   // Is refreshToken in db?
   const foundUser = await findOneByToken(refreshToken);
   if (!foundUser) {
-    res.clearCookie("jwt", { secure: true });
+    res.clearCookie("jwt");
     return res.status(204);
   }
 
@@ -161,7 +160,7 @@ module.exports.logout = async (req, res) => {
   const result = await foundUser.save();
   console.log(result);
 
-  res.clearCookie("jwt", { secure: true });
+  res.clearCookie("jwt");
   res.status(204);
 };
 
