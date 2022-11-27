@@ -8,11 +8,15 @@ const {
   usernames,
   refresh,
   logout,
+  verifyEmailToken,
+  resendEmail,
 } = require("./userController");
 
 /* GET users listing. */
 router.post("/register", register);
 router.post("/login", login);
+router.post("/verifyEmailToken", verifyEmailToken);
+router.post("/resend", resendEmail);
 router.get("/logout", logout);
 router.get(
   "/usernames",

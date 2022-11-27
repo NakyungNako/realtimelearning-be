@@ -5,6 +5,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const connection = require("../config/mongoDBConfig");
 const userRoutes = require("./users/userRouter");
+const groupRoutes = require("./groups/groupRouter");
 const credentials = require("../middleware/credentials");
 
 //database connection
@@ -21,6 +22,7 @@ app.use(cookieParser());
 
 //routes
 app.use("/api/users", userRoutes);
+app.use("/api/group", groupRoutes);
 
 app.listen(process.env.PORT || 5000, () =>
   console.log(`Backend server is running...`)

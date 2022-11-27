@@ -20,15 +20,24 @@ module.exports.findOneByUsername = async (username) => {
   }
 };
 
+module.exports.findOneById = async (id) => {
+  try {
+    const foundUser = await User.findById(id);
+    return foundUser;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
 module.exports.registerUser = async (data) => {
   try {
     await User.create({
       username: data.username,
       email: data.email,
       password: data.password,
-      registerType: "registered",
     });
-    return { message: "Register new user successfully!" };
+    return { message: "Please check your email for verification" };
   } catch (error) {
     console.error(error);
     return {
@@ -57,6 +66,25 @@ module.exports.getAllUsernames = async () => {
     console.error(error);
     return {
       error: error.message || "Some error occurred while get Users!",
+    };
+  }
+};
+
+module.exports.updateVerify = async (username) => {
+  try {
+    const respones = await User.updateOne(
+      { username: username },
+      {
+        $set: {
+          verified: true,
+        },
+      }
+    );
+    return respones;
+  } catch (error) {
+    console.error(error);
+    return {
+      error: error.message || "Some error occurred while verifying!",
     };
   }
 };
