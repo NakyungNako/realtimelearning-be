@@ -16,7 +16,6 @@ const { sendInviteLink } = require("../../utils/Email");
 
 //get all groups of user
 module.exports.groups = async (req, res) => {
-  console.log(req.query);
   try {
     const groups = await findUserGroups(req.query.userId);
     return res.status(200).json(groups);
@@ -52,7 +51,6 @@ module.exports.addUser = async (req, res) => {
   try {
     const { groupToken, userId } = req.body;
     const foundGroup = await findGroupByToken(groupToken);
-    console.log(foundGroup.groupname);
 
     if (foundGroup.expDate - Date.now() <= 0)
       return res

@@ -6,7 +6,7 @@ module.exports.findUserGroups = async (userId) => {
       users: { $elemMatch: { $eq: userId } },
     })
       .populate("groupname")
-      .populate("users", "username")
+      .populate("users", "username picture")
       .populate("groupAdmin", "username")
       .populate("groupOwner", "username")
       .sort({ updateAt: -1 });
@@ -21,7 +21,7 @@ module.exports.findUserGroups = async (userId) => {
 module.exports.findGroupById = async (groupId) => {
   try {
     const foundGroup = await Group.findById(groupId)
-      .populate("users", "username")
+      .populate("users", "username picture")
       .populate("groupOwner", "username")
       .populate("groupAdmin", "username");
     return foundGroup;
@@ -50,7 +50,7 @@ module.exports.createGroup = async (data) => {
       groupAdmin: [data.user],
     });
     const newGroup = await Group.findOne({ _id: createdGroup._id })
-      .populate("users", "username")
+      .populate("users", "username picture")
       .populate("groupOwner", "username")
       .populate("groupAdmin", "username");
     return newGroup;
@@ -91,7 +91,7 @@ module.exports.addUserToGroup = async (groupId, userId) => {
         new: true,
       }
     )
-      .populate("users", "username")
+      .populate("users", "username picture")
       .populate("groupOwner", "username")
       .populate("groupAdmin", "username");
     if (!added) {
@@ -119,7 +119,7 @@ module.exports.removeUserToGroup = async (groupId, userId) => {
         new: true,
       }
     )
-      .populate("users", "username")
+      .populate("users", "username picture")
       .populate("groupOwner", "username")
       .populate("groupAdmin", "username");
     if (!removed) {
@@ -149,7 +149,7 @@ module.exports.giveUserAdmin = async (groupId, userId) => {
         new: true,
       }
     )
-      .populate("users", "username")
+      .populate("users", "username picture")
       .populate("groupOwner", "username")
       .populate("groupAdmin", "username");
     if (!admined) {
@@ -179,7 +179,7 @@ module.exports.removeUserAdmin = async (groupId, userId) => {
         new: true,
       }
     )
-      .populate("users", "username")
+      .populate("users", "username picture")
       .populate("groupOwner", "username")
       .populate("groupAdmin", "username");
     if (!noAdmin) {

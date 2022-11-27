@@ -88,3 +88,25 @@ module.exports.updateVerify = async (username) => {
     };
   }
 };
+
+module.exports.findOrCreateGoogleUser = async (
+  email,
+  givenName,
+  familyName,
+  picture
+) => {
+  try {
+    const user = await User.findOneAndUpdate(
+      { email: email },
+      {
+        username: `${givenName}${familyName}`,
+        picture: picture,
+        verified: true,
+      },
+      { new: true, upsert: true }
+    );
+    if (user) return user;
+  } catch (error) {
+    console.log("Error signing up", error);
+  }
+};

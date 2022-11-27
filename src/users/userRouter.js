@@ -10,6 +10,7 @@ const {
   logout,
   verifyEmailToken,
   resendEmail,
+  googleLogin,
 } = require("./userController");
 
 /* GET users listing. */
@@ -24,5 +25,6 @@ router.get(
   usernames
 );
 router.get("/refresh", refresh);
+router.post("/login/google", googleLogin);
 
 module.exports = router;

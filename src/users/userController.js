@@ -6,11 +6,17 @@ const {
   findOneByToken,
   getAllUsernames,
   updateVerify,
+  findOrCreateGoogleUser,
 } = require("./userService");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { JWT_SECRET, JWT_EMAIL_SECRET } = require("../../config/env");
+const {
+  JWT_SECRET,
+  JWT_EMAIL_SECRET,
+  GOOGLE_CLIENT_ID,
+} = require("../../config/env");
 const { verifyUserEmail } = require("../../utils/Email");
+const { verifyGoogleToken } = require("../../utils/verifyGoogleToken");
 
 module.exports.register = async (req, res, next) => {
   try {
@@ -63,7 +69,7 @@ module.exports.register = async (req, res, next) => {
       return;
     }
     const emailToken = jwt.sign({ username: data.username }, JWT_EMAIL_SECRET, {
-      expiresIn: 20,
+      expiresIn: "1h",
     });
 
     verifyUserEmail(data.username, data.email, emailToken);
@@ -94,7 +100,6 @@ module.exports.resendEmail = async (req, res) => {
 };
 
 module.exports.verifyEmailToken = async (req, res) => {
-  console.log(req.body);
   const foundUser = await findOneByUsername(req.body.username);
   if (!foundUser)
     return res.status(406).json({ message: "cannot find the user" });
@@ -115,20 +120,14 @@ module.exports.login = async (req, res) => {
     const data = req.body;
     //Find User In DB
     const user = await findOneByUsername(data.username);
-    // console.log(user);
+
     if (!user) {
       return res.status(200).json({
         error: true,
         message: "The username you entered is not registered.",
       });
     }
-    //Check Register type
-    // if (user.registerType == "socialLinked") {
-    //   return res.status(400).json({
-    //     error: true,
-    //     message: "Please login with your social account.",
-    //   });
-    // }
+
     //Check Password
     console.log("Password " + user.password);
     const isValid = await bcrypt.compare(data.password, user.password);
@@ -145,21 +144,7 @@ module.exports.login = async (req, res) => {
         message: "Your Email is not verified",
       });
     }
-    //Check is verified, is lock
-    // const isVerified = user.isVerify === true;
-    // if (!isVerified) {
-    //   return res.status(400).json({
-    //     error: true,
-    //     message: "Your email isn't verified. Please confirm your email.",
-    //   });
-    // }
-    // const isLocked = user.isLock === true;
-    // if (isLocked) {
-    //   return res.status(400).json({
-    //     error: true,
-    //     message: "Your account is locked.",
-    //   });
-    // }
+
     //JWT
     const token = jwt.sign(
       { id: user.id, username: user.username },
@@ -172,19 +157,21 @@ module.exports.login = async (req, res) => {
       process.env.JWT_REFRESH_SECRET,
       { expiresIn: "1h" }
     );
+
     user.refreshToken = refreshToken;
     await user.save();
-    //res.header("auth-token", token).send(token);
+
     res.cookie("jwt", refreshToken, {
       httpOnly: true,
       secure: true,
       maxAge: 24 * 60 * 60 * 1000,
     });
-    // const tokenObject = Util.issueJWT(user);
+
     return res.status(200).send({
       token: token,
       username: user.username,
       id: user.id,
+      email: user.email,
       message: "logged in successfully!!!",
     });
   } catch (error) {
@@ -207,7 +194,6 @@ module.exports.logout = async (req, res) => {
   // Delete refreshToken in db
   foundUser.refreshToken = "";
   const result = await foundUser.save();
-  console.log(result);
 
   res.clearCookie("jwt", { httpOnly: true, secure: true });
   res.status(204).json({ message: "logout success" });
@@ -217,7 +203,6 @@ module.exports.usernames = async (req, res) => {
   try {
     const users = await getAllUsernames();
     return res.status(200).json(users);
-    console.log("ahihi");
   } catch (error) {
     console.log(error);
   }
@@ -225,7 +210,7 @@ module.exports.usernames = async (req, res) => {
 
 module.exports.refresh = async (req, res) => {
   const cookies = req.cookies;
-  console.log("refresh nha", cookies);
+  console.log("refresh", cookies);
   if (!cookies?.jwt) return res.status(401).json({ message: "Unauthorized" });
   const user = await findOneByToken(cookies.jwt);
   if (user) {
@@ -250,5 +235,62 @@ module.exports.refresh = async (req, res) => {
     });
   } else {
     return res.status(406).json({ message: "Unauthorized - Cannot find user" });
+  }
+};
+
+module.exports.googleLogin = async (req, res) => {
+  try {
+    if (req.body.credential) {
+      const verificationResponse = await verifyGoogleToken(req.body.credential);
+
+      if (verificationResponse.error) {
+        return res.status(400).json({
+          message: verificationResponse.error,
+        });
+      }
+
+      const profile = verificationResponse?.payload;
+
+      const googleUser = await findOrCreateGoogleUser(
+        profile.email,
+        profile.given_name,
+        profile.family_name,
+        profile.picture
+      );
+
+      const token = jwt.sign(
+        { id: googleUser.id, username: googleUser.username },
+        JWT_SECRET,
+        { expiresIn: 10 }
+      );
+
+      const refreshToken = jwt.sign(
+        { username: googleUser.username },
+        process.env.JWT_REFRESH_SECRET,
+        { expiresIn: "1h" }
+      );
+
+      googleUser.refreshToken = refreshToken;
+      await googleUser.save();
+
+      res.cookie("jwt", refreshToken, {
+        httpOnly: true,
+        secure: true,
+        maxAge: 24 * 60 * 60 * 1000,
+      });
+
+      return res.status(200).send({
+        token: token,
+        username: googleUser.username,
+        id: googleUser.id,
+        picture: googleUser.picture,
+        email: googleUser.email,
+        message: "logged in successfully!!!",
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      message: error?.message || error,
+    });
   }
 };
