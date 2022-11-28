@@ -7,6 +7,7 @@ const connection = require("../config/mongoDBConfig");
 const userRoutes = require("./users/userRouter");
 const groupRoutes = require("./groups/groupRouter");
 const credentials = require("../middleware/credentials");
+const { CLIENT_URL } = require("../config/env");
 
 //database connection
 connection();
@@ -15,7 +16,7 @@ app.use(credentials);
 app.use(express.json());
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: CLIENT_URL,
   })
 );
 app.use(cookieParser());
