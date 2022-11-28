@@ -19,6 +19,7 @@ let transporter = nodemailer.createTransport({
 
 module.exports.verifyUserEmail = async (username, userEmail, token) => {
   try {
+    console.log(transporter);
     let info = await transporter.sendMail({
       from: EMAIL_VERIFIER,
       to: userEmail,
