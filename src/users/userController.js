@@ -15,7 +15,7 @@ const {
   JWT_EMAIL_SECRET,
   GOOGLE_CLIENT_ID,
 } = require("../../config/env");
-const { verifyUserEmail } = require("../../utils/Email");
+const { verifyUserEmail } = require("../../utils/email");
 const { verifyGoogleToken } = require("../../utils/verifyGoogleToken");
 
 module.exports.register = async (req, res, next) => {
