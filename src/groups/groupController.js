@@ -12,7 +12,7 @@ const {
 const randomstring = require("randomstring");
 const { findOneById } = require("../users/userService");
 const { emailValidate } = require("../../utils/mailValidate");
-const { sendInviteLink } = require("../../utils/Email");
+const { sendInviteLink } = require("../../utils/email");
 
 //get all groups of user
 module.exports.groups = async (req, res) => {
