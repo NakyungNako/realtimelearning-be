@@ -89,7 +89,7 @@ module.exports.resendEmail = async (req, res) => {
     { username: foundUser.username },
     JWT_EMAIL_SECRET,
     {
-      expiresIn: 20,
+      expiresIn: "1h",
     }
   );
 
@@ -149,13 +149,13 @@ module.exports.login = async (req, res) => {
     const token = jwt.sign(
       { id: user.id, username: user.username },
       JWT_SECRET,
-      { expiresIn: 10 }
+      { expiresIn: "1h" }
     );
 
     const refreshToken = jwt.sign(
       { username: user.username },
       process.env.JWT_REFRESH_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "1d" }
     );
 
     user.refreshToken = refreshToken;
@@ -164,6 +164,7 @@ module.exports.login = async (req, res) => {
     res.cookie("jwt", refreshToken, {
       httpOnly: true,
       secure: true,
+      sameSite: "none",
       maxAge: 24 * 60 * 60 * 1000,
     });
 
@@ -276,6 +277,7 @@ module.exports.googleLogin = async (req, res) => {
       res.cookie("jwt", refreshToken, {
         httpOnly: true,
         secure: true,
+        sameSite: "none",
         maxAge: 24 * 60 * 60 * 1000,
       });
 
