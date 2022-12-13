@@ -7,10 +7,15 @@ const {
   findOneById,
   deleteOneById,
 } = require("./presentationService");
+const randomstring = require("randomstring");
 
 module.exports.createNewPre = async (req, res) => {
   try {
-    const newPre = await createOne(req.body.title, req.body.author);
+    const preCode = randomstring.generate({
+      length: 8,
+      charset: "numeric",
+    });
+    const newPre = await createOne(req.body.title, req.body.author, preCode);
     const exportGroup = await addPresentation(req.body.groupId, newPre.id);
     if (exportGroup) return res.status(200).json(exportGroup);
     return res.status(400).json({ message: "cannot create new presentation" });
