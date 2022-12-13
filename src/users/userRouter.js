@@ -11,10 +11,12 @@ const {
   verifyEmailToken,
   resendEmail,
   googleLogin,
+  guest,
 } = require("./userController");
 
 /* GET users listing. */
 router.post("/register", register);
+router.post("/guest", guest);
 router.post("/login", login);
 router.post("/verifyEmailToken", verifyEmailToken);
 router.post("/resend", resendEmail);

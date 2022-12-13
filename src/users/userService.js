@@ -110,3 +110,18 @@ module.exports.findOrCreateGoogleUser = async (
     console.log("Error signing up", error);
   }
 };
+
+module.exports.createGuest = async (name) => {
+  try {
+    await User.create({
+      username: name,
+      expireAt: Date.now(),
+    });
+    return { message: "Please check your email for verification" };
+  } catch (error) {
+    console.error(error);
+    return {
+      error: error.message || "Some error occurred while creating User!",
+    };
+  }
+};

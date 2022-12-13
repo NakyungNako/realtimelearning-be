@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const connection = require("../config/mongoDBConfig");
 const userRoutes = require("./users/userRouter");
 const groupRoutes = require("./groups/groupRouter");
+const presentationRoutes = require("./presentations/presentationRouter");
 const credentials = require("../middleware/credentials");
 const { CLIENT_URL } = require("../config/env");
 
@@ -24,6 +25,7 @@ app.use(cookieParser());
 //routes
 app.use("/api/users", userRoutes);
 app.use("/api/group", groupRoutes);
+app.use("/api/present", presentationRoutes);
 
 app.listen(process.env.PORT || 5000, () =>
   console.log(`Backend server is running...`)

@@ -9,6 +9,7 @@ module.exports.findUserGroups = async (userId) => {
       .populate("users", "username picture")
       .populate("groupAdmin", "username")
       .populate("groupOwner", "username")
+      .populate("presentations", "title author createdAt updatedAt")
       .sort({ updateAt: -1 });
 
     return foundGroup;
@@ -23,7 +24,8 @@ module.exports.findGroupById = async (groupId) => {
     const foundGroup = await Group.findById(groupId)
       .populate("users", "username picture")
       .populate("groupOwner", "username")
-      .populate("groupAdmin", "username");
+      .populate("groupAdmin", "username")
+      .populate("presentations", "title author createdAt updatedAt");
     return foundGroup;
   } catch (error) {
     console.error(error);
@@ -52,7 +54,8 @@ module.exports.createGroup = async (data) => {
     const newGroup = await Group.findOne({ _id: createdGroup._id })
       .populate("users", "username picture")
       .populate("groupOwner", "username")
-      .populate("groupAdmin", "username");
+      .populate("groupAdmin", "username")
+      .populate("presentations", "title author createdAt updatedAt");
     return newGroup;
   } catch (error) {
     console.error(error);
@@ -93,7 +96,8 @@ module.exports.addUserToGroup = async (groupId, userId) => {
     )
       .populate("users", "username picture")
       .populate("groupOwner", "username")
-      .populate("groupAdmin", "username");
+      .populate("groupAdmin", "username")
+      .populate("presentations", "title author createdAt updatedAt");
     if (!added) {
       return {
         message: "failed because you are already in the Group!",
@@ -121,7 +125,8 @@ module.exports.removeUserToGroup = async (groupId, userId) => {
     )
       .populate("users", "username picture")
       .populate("groupOwner", "username")
-      .populate("groupAdmin", "username");
+      .populate("groupAdmin", "username")
+      .populate("presentations", "title author createdAt updatedAt");
     if (!removed) {
       return {
         message:
@@ -151,7 +156,8 @@ module.exports.giveUserAdmin = async (groupId, userId) => {
     )
       .populate("users", "username picture")
       .populate("groupOwner", "username")
-      .populate("groupAdmin", "username");
+      .populate("groupAdmin", "username")
+      .populate("presentations", "title author createdAt updatedAt");
     if (!admined) {
       return {
         message: "Something wrong when moderating someone!",
@@ -181,12 +187,69 @@ module.exports.removeUserAdmin = async (groupId, userId) => {
     )
       .populate("users", "username picture")
       .populate("groupOwner", "username")
-      .populate("groupAdmin", "username");
+      .populate("groupAdmin", "username")
+      .populate("presentations", "title author createdAt updatedAt");
     if (!noAdmin) {
       return {
         message: "Something wrong when removing admin!",
       };
     } else return noAdmin;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+module.exports.addPresentation = async (groupId, preId) => {
+  try {
+    const added = await Group.findOneAndUpdate(
+      {
+        _id: groupId,
+      },
+      {
+        $push: { presentations: preId },
+      },
+      {
+        new: true,
+      }
+    )
+      .populate("users", "username picture")
+      .populate("groupOwner", "username")
+      .populate("groupAdmin", "username")
+      .populate("presentations", "title author createdAt updatedAt");
+    if (!added) {
+      return {
+        message: "failed because you are already in the Group!",
+      };
+    } else return { added, message: "successful", id: preId };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+module.exports.deletePresentation = async (groupId, preId) => {
+  try {
+    const removed = await Group.findOneAndUpdate(
+      {
+        _id: groupId,
+      },
+      {
+        $pull: { presentations: preId },
+      },
+      {
+        new: true,
+      }
+    )
+      .populate("users", "username picture")
+      .populate("groupOwner", "username")
+      .populate("groupAdmin", "username")
+      .populate("presentations", "title author createdAt updatedAt");
+    if (!removed) {
+      return {
+        message: "cannot remove the presentation in Group!",
+      };
+    } else return removed;
   } catch (error) {
     console.error(error);
     throw error;

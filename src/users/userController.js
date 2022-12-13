@@ -7,6 +7,7 @@ const {
   getAllUsernames,
   updateVerify,
   findOrCreateGoogleUser,
+  createGuest,
 } = require("./userService");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -69,7 +70,7 @@ module.exports.register = async (req, res, next) => {
       return;
     }
     const emailToken = jwt.sign({ username: data.username }, JWT_EMAIL_SECRET, {
-      expiresIn: "1h",
+      expiresIn: 60,
     });
 
     verifyUserEmail(data.username, data.email, emailToken);
@@ -229,7 +230,7 @@ module.exports.refresh = async (req, res) => {
         const token = jwt.sign(
           { id: user.id, username: user.username },
           JWT_SECRET,
-          { expiresIn: 10 }
+          { expiresIn: "1h" }
         );
         return res.json({ id, username, token });
       }
@@ -295,4 +296,9 @@ module.exports.googleLogin = async (req, res) => {
       message: error?.message || error,
     });
   }
+};
+
+module.exports.guest = async (req, res) => {
+  const guestUser = createGuest(req.body.username);
+  return res.status(200).json(guestUser);
 };

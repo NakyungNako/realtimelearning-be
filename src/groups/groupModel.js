@@ -6,6 +6,9 @@ const groupSchema = new mongoose.Schema(
     users: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
     groupOwner: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
     groupAdmin: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+    presentations: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "presentation" },
+    ],
     token: String,
     expDate: Date,
   },
