@@ -1,6 +1,6 @@
 const Presentation = require("./presentationModel");
 
-module.exports.createOne = async (title, author) => {
+module.exports.createOne = async (title, author, code) => {
   try {
     const createdPre = await Presentation.create({
       title: title,
@@ -15,6 +15,7 @@ module.exports.createOne = async (title, author) => {
           ],
         },
       ],
+      presentationId: code,
     });
     return createdPre;
   } catch (error) {
