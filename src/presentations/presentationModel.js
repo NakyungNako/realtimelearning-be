@@ -11,6 +11,7 @@ const presentationSchema = new mongoose.Schema(
       },
     ],
     presentationId: { type: String },
+    isPrivate: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

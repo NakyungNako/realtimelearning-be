@@ -15,6 +15,7 @@ module.exports.createOne = async (title, author, code) => {
           ],
         },
       ],
+      isPrivate: false,
       presentationId: code,
     });
     return createdPre;
@@ -27,6 +28,16 @@ module.exports.createOne = async (title, author, code) => {
 module.exports.findOneById = async (preId) => {
   try {
     const foundPre = await Presentation.findById(preId);
+    return foundPre;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+module.exports.findOneByCode = async (preCode) => {
+  try {
+    const foundPre = await Presentation.findOne({ presentationId: preCode });
     return foundPre;
   } catch (error) {
     console.error(error);

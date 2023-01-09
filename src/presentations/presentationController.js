@@ -24,7 +24,7 @@ module.exports.createNewPre = async (req, res) => {
   }
 };
 
-module.exports.findPre = async (req, res) => {
+module.exports.findPreById = async (req, res) => {
   try {
     const preId = req.query.id;
     const foundPre = await findOneById(preId);
@@ -54,9 +54,9 @@ module.exports.addSlideToPre = async (req, res) => {
     newSlides.push({
       question: " ",
       answers: [
-        { answer: "", correct: false },
-        { answer: "", correct: false },
-        { answer: "", correct: false },
+        { answer: "", correct: false, total: 0 },
+        { answer: "", correct: false, total: 0 },
+        { answer: "", correct: false, total: 0 },
       ],
     });
     foundPre.slides = newSlides;

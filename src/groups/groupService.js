@@ -43,6 +43,21 @@ module.exports.findGroupByToken = async (groupToken) => {
   }
 };
 
+module.exports.findGroupByPresent = async (preId) => {
+  try {
+    const foundGroup = await Group.find({
+      presentations: { $elemMatch: { $eq: preId } },
+    })
+      .populate("groupname")
+      .populate("users", "email")
+      .sort({ updateAt: -1 });
+    return foundGroup;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
 module.exports.createGroup = async (data) => {
   try {
     const createdGroup = await Group.create({

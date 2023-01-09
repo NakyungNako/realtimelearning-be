@@ -8,9 +8,11 @@ const {
   deleteGroup,
   findGroupById,
   findGroupByToken,
+  findGroupByPresent,
 } = require("./groupService");
 const randomstring = require("randomstring");
 const { findOneById } = require("../users/userService");
+const { findOneByCode } = require("../presentations/presentationService");
 const { emailValidate } = require("../../utils/mailValidate");
 const { sendInviteLink } = require("../../utils/email");
 
@@ -158,4 +160,18 @@ module.exports.sendLinkToUserEmail = async (req, res) => {
   }
   sendInviteLink(userEmail, groupToken);
   return res.status(200).json({ message: "Email Sent!" });
+};
+
+module.exports.privatePresentCheck = async (req, res) => {
+  const { presentCode, email } = req.body;
+  const foundPre = await findOneByCode(presentCode);
+  if (foundPre.isPrivate) {
+    const foundGroup = await findGroupByPresent(foundPre.id);
+    const found = foundGroup[0].users.some((el) => el.email === email);
+    if (found) {
+      return res.status(200).json({ message: true });
+    }
+    return res.status(200).json({ message: false });
+  }
+  return res.status(200).json({ message: "public" });
 };
