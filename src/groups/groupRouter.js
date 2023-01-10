@@ -12,6 +12,8 @@ const {
   sendLinkToUserEmail,
   privatePresentCheck,
 } = require("./groupController");
+const passport = require("passport");
+const passportConfig = require("../../middleware/passport");
 
 const router = express.Router();
 
@@ -20,7 +22,7 @@ router.post("/delete", deleteGroup);
 router.post("/createToken", createToken);
 router.post("/sendinvitation", sendLinkToUserEmail);
 router.post("/privateCheck", privatePresentCheck);
-router.get("/", groups);
+router.get("/", passport.authenticate("jwt", { session: false }), groups);
 router.put("/add", addUser);
 router.put("/remove", removeUser);
 router.put("/addadmin", addAdmin);

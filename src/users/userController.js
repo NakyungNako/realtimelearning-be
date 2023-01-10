@@ -226,13 +226,14 @@ module.exports.refresh = async (req, res) => {
       } else {
         const username = user.username;
         const id = user.id;
+        const email = user.email;
         // Correct token we send a new access token
         const token = jwt.sign(
           { id: user.id, username: user.username },
           JWT_SECRET,
           { expiresIn: "1h" }
         );
-        return res.json({ id, username, token });
+        return res.json({ id, username, email, token });
       }
     });
   } else {
