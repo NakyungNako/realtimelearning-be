@@ -36,7 +36,6 @@ module.exports.findChatByName = async (chatName) => {
     const groupChat = await Chat.findOne({ chatName: chatName })
       .populate("users", "username")
       .populate("groupAdmin", "username");
-
     return groupChat;
   } catch (error) {
     console.error(error);

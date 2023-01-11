@@ -88,6 +88,7 @@ module.exports.updatePresent = async (req, res) => {
     foundPre.title = present.title;
     foundPre.author = present.author;
     foundPre.slides = present.slides;
+    foundPre.isPrivate = present.isPrivate;
     await foundPre.save();
     const newPre = await findOneById(preId);
     if (newPre) return res.status(200).json({ message: "save successfully!" });
