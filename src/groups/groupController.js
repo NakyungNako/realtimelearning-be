@@ -41,7 +41,8 @@ module.exports.deleteGroup = async (req, res) => {
     const { groupId, userId } = req.body;
     const removedGroup = await deleteGroup(userId, groupId);
     if (removedGroup.deletedCount === 1) {
-      return res.status(200).json({ messsage: "remove successfully!" });
+      const groups = await findUserGroups(userId);
+      return res.status(200).json({ data: groups, messsage: "remove successfully!" });
     } else return res.status(200).json(removedGroup);
   } catch (error) {
     console.log(error);
